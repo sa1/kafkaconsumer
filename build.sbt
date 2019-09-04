@@ -5,7 +5,7 @@ ThisBuild / version          := "0.1.0-SNAPSHOT"
 ThisBuild / organization     := "com.goibibo"
 ThisBuild / organizationName := "goibibo"
 
-enablePlugins(JavaAppPackaging)
+enablePlugins(sbtdocker.DockerPlugin, JavaAppPackaging)
 
 lazy val root = (project in file("."))
   .settings(
@@ -23,6 +23,17 @@ lazy val root = (project in file("."))
                                )
   )
 
+
+dockerfile in docker := {
+  val appDir: File = stage.value
+  val targetDir = "/app"
+
+  new Dockerfile {
+    from("openjdk:8-jre")
+    entryPoint(s"$targetDir/bin/${executableScriptName.value}")
+    copy(appDir, targetDir, chown = "daemon:daemon")
+  }
+}
 
 // Uncomment the following for publishing to Sonatype.
 // See https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for more detail.
